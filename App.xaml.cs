@@ -9,6 +9,11 @@ namespace RSCHS
     /// </summary>
     public partial class App : Application
     {
+        private void Application_Startup(object sender, StartupEventArgs e)
+        {
+            // Запускаем с окна авторизации
+            LoginWindow loginWindow = new LoginWindow();
+            loginWindow.Show();
+        }
     }
-
 }

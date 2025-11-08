@@ -5,8 +5,47 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RSCHS"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="MainWindow" Height="600" Width="1000"
+        WindowStartupLocation="CenterScreen">
 
-    </Grid>
+    <DockPanel>
+
+        <Border DockPanel.Dock="Top" Background="#FF3333" Padding="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="МЧС РОССИИ - СИСТЕМА ДИСПЕТЧЕРА" 
+                          Foreground="White" FontSize="16" FontWeight="Bold"/>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <TextBlock Text="Диспетчер:" Foreground="White" Margin="0,0,5,0"/>
+                    <TextBlock x:Name="txtDispatcherName" Foreground="White" FontWeight="Bold"/>
+                    <Button x:Name="btnLogout" Content="Выйти" Margin="10,0,0,0" 
+                           Click="BtnLogout_Click" Background="#FFD700"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Меню -->
+        <TabControl x:Name="MainTabControl">
+            <TabItem Header="Происшествия">
+                <!-- Здесь будет список происшествий -->
+            </TabItem>
+
+            <TabItem Header="Новое происшествие">
+                <!-- Здесь будет форма создания происшествия -->
+            </TabItem>
+
+            <TabItem Header="Назначения">
+                <!-- Здесь будет управление назначениями -->
+            </TabItem>
+
+            <TabItem Header="Отчеты">
+                <!-- Здесь будет работа с отчетами -->
+            </TabItem>
+        </TabControl>
+    </DockPanel>
 </Window>

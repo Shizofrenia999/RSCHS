@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36408.4 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RSCHS", "RSCHS.csproj", "{B74C9E2B-E835-4E94-8823-9321C4C7167C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B74C9E2B-E835-4E94-8823-9321C4C7167C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B74C9E2B-E835-4E94-8823-9321C4C7167C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B74C9E2B-E835-4E94-8823-9321C4C7167C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B74C9E2B-E835-4E94-8823-9321C4C7167C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A39C664C-9F82-428E-AD2E-C6E0171F4179}
+	EndGlobalSection
+EndGlobal

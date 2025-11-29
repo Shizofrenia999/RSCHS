@@ -13,8 +13,10 @@
             <TextBox x:Name="txtLogin" Height="25"/>
             <Label Content="Пароль:" Margin="0,10,0,0"/>
             <PasswordBox x:Name="txtPassword" Height="25"/>
-            <Button x:Name="btnLogin" Content="Войти" Height="30" Margin="0,20,0,0" Click="BtnLogin_Click" Background="#FFD700"/>
+            <Button x:Name="btnLogin" Content="Войти" Click="BtnLogin_Click" Background="#FF3333" Foreground="White" FontWeight="Bold" Height="30"/>
+            <Button x:Name="btnRegister" Content="Регистрация" Click="BtnRegister_Click" Margin="0,10,0,0" Height="25"/>
             <TextBlock x:Name="txtError" Foreground="Red" TextWrapping="Wrap" Margin="0,10,0,0" Visibility="Collapsed"/>
+            
         </StackPanel>
     </Grid>
 </Window>

@@ -27,34 +27,32 @@ namespace RSCHS
 
         private void BtnLogin_Click(object sender, RoutedEventArgs e)
         {
-            string login = txtLogin.Text.Trim();
-            string password = txtPassword.Password;
+            try
+            {
+                var user = DatabaseHelper.AuthenticateUser(txtLogin.Text, txtPassword.Password);
 
-            if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(password))
-            {
-                ShowError("Введите логин и пароль");
-                return;
+                if (user != null)
+                {
+                    MainWindow mainWindow = new MainWindow(user);
+                    mainWindow.Show();
+                    this.Close();
+                }
+                else
+                {
+                    MessageBox.Show("Неверный логин или пароль!");
+                }
             }
-
-            // Проверка учетных данных
-            Employee employee = DatabaseHelper.AuthenticateUser(login, password);
-            if (employee != null)
+            catch (Exception ex)
             {
-                // Открываем главное окно
-                MainWindow mainWindow = new MainWindow(employee);
-                mainWindow.Show();
-                this.Close();
-            }
-            else
-            {
-                ShowError("Неверный логин или пароль");
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
 
-        private void ShowError(string message)
+
+        private void BtnRegister_Click(object sender, RoutedEventArgs e)
         {
-            txtError.Text = message;
-            txtError.Visibility = Visibility.Visible;
+            RegistrationWindow registrationWindow = new RegistrationWindow();
+            registrationWindow.ShowDialog();
         }
     }
 }

@@ -5,14 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data.SqlClient;
 using System.Configuration;
+using System.Windows;
 
 namespace RSCHS
 {
     public static class DatabaseHelper
     {
-        private static string connectionString = ConfigurationManager.ConnectionStrings["MCHSConnection"].ConnectionString;
-
-        public static Employee AuthenticateUser(string login, string password)
+        private static string connectionString = "Server=localhost;Database=RSCHS;User Id=sa;Password=123;TrustServerCertificate=true;"; public static Employee AuthenticateUser(string login, string password)
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -22,7 +21,7 @@ namespace RSCHS
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Login", login);
-                    command.Parameters.AddWithValue("@Password", password); // В реальном приложении нужно хэшировать пароли!
+                    command.Parameters.AddWithValue("@Password", password);
 
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
@@ -42,6 +41,34 @@ namespace RSCHS
                 }
             }
             return null;
+        }
+        public static bool CreateIncident(string location, string type, string description, string priority, string callPhone)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string query = @"INSERT INTO Происшествия (МестоПроисшествия, Тип, Описание, Приоритет, Статус, ТелефонВызова, Дата) 
+                           VALUES (@Location, @Type, @Description, @Priority, 'Новый', @CallPhone, GETDATE())";
+
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@Location", location);
+                        command.Parameters.AddWithValue("@Type", type);
+                        command.Parameters.AddWithValue("@Description", description);
+                        command.Parameters.AddWithValue("@Priority", priority);
+                        command.Parameters.AddWithValue("@CallPhone", callPhone);
+
+                        return command.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка создания происшествия: {ex.Message}");
+                return false;
+            }
         }
 
         public static List<Incident> GetIncidents()
@@ -64,7 +91,7 @@ namespace RSCHS
                             Location = reader["МестоПроисшествия"].ToString(),
                             Type = reader["Тип"].ToString(),
                             Description = reader["Описание"].ToString(),
-                            Priority = (int)reader["Приоритет"],
+                            Priority = reader["Приоритет"].ToString(),
                             Status = reader["Статус"].ToString(),
                             CallPhone = reader["ТелефонВызова"].ToString(),
                             Date = (DateTime)reader["Дата"]

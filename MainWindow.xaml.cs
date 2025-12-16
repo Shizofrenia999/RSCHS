@@ -36,7 +36,8 @@ namespace RSCHS
                 foreach (TabItem tab in MainTabControl.Items)
                 {
                     if (tab.Header.ToString() == "Новое происшествие" ||
-                        tab.Header.ToString() == "Назначения")
+                        tab.Header.ToString() == "Назначения" ||
+                        tab.Header.ToString() == "Назначить вызов") 
                     {
                         tab.Visibility = Visibility.Collapsed;
                     }
@@ -61,6 +62,10 @@ namespace RSCHS
 
                     case "Новое происшествие":
                         tab.Content = CreateNewIncidentForm();
+                        break;
+
+                    case "Назначить вызов": 
+                        tab.Content = CreateAssignmentForm();
                         break;
 
                     case "Назначения":
@@ -113,6 +118,256 @@ namespace RSCHS
             }
         }
 
+        private void LoadAssignmentData(ComboBox incidentCombo, ComboBox employeeCombo, ComboBox vehicleCombo)
+        {
+            try
+            {
+                string incidentQuery = "SELECT ID, МестоПроисшествия + ' (' + Тип + ')' as Display FROM Происшествия WHERE Статус = 'Новый'";
+                var incidents = ExecuteQuery(incidentQuery);
+                incidentCombo.ItemsSource = incidents.DefaultView;
+                incidentCombo.DisplayMemberPath = "Display";
+                incidentCombo.SelectedValuePath = "ID";
+
+                string employeeQuery = "SELECT ID, ФИО + ' (' + Должность + ')' as Display FROM Сотрудники WHERE Статус = 'Активен'";
+                var employees = ExecuteQuery(employeeQuery);
+                employeeCombo.ItemsSource = employees.DefaultView;
+                employeeCombo.DisplayMemberPath = "Display";
+                employeeCombo.SelectedValuePath = "ID";
+
+                string vehicleQuery = "SELECT ID, Марка + ' ' + Модель + ' (' + ГОСномер + ')' as Display FROM Транспорт";
+                var vehicles = ExecuteQuery(vehicleQuery);
+                vehicleCombo.ItemsSource = vehicles.DefaultView;
+                vehicleCombo.DisplayMemberPath = "Display";
+                vehicleCombo.SelectedValuePath = "ID";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка загрузки данных: {ex.Message}");
+            }
+        }
+
+        private void CreateAssignment(ComboBox incidentCombo, ComboBox employeeCombo, ComboBox vehicleCombo)
+        {
+            try
+            {
+                if (incidentCombo.SelectedValue == null || employeeCombo.SelectedValue == null || vehicleCombo.SelectedValue == null)
+                {
+                    MessageBox.Show("Выберите все поля!");
+                    return;
+                }
+
+                int incidentId = (int)incidentCombo.SelectedValue;
+                int employeeId = (int)employeeCombo.SelectedValue;
+                int vehicleId = (int)vehicleCombo.SelectedValue;
+
+                string query = @"INSERT INTO НазначенияНаВызовы (ID_Происшествия, ID_Сотрудника, ID_Транспорта, Дата) 
+                        VALUES (@IncidentId, @EmployeeId, @VehicleId, GETDATE())";
+
+                string connectionString = "Server=localhost;Database=RSCHS;User Id=sa;Password=123;TrustServerCertificate=true;";
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    using (var command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@IncidentId", incidentId);
+                        command.Parameters.AddWithValue("@EmployeeId", employeeId);
+                        command.Parameters.AddWithValue("@VehicleId", vehicleId);
+
+                        int result = command.ExecuteNonQuery();
+                        if (result > 0)
+                        {
+                            MessageBox.Show("Назначение успешно создано!");
+
+                            UpdateIncidentStatus(incidentId, "В работе");
+
+                            RefreshAllDataImmediately();
+
+
+                            ClearAssignmentForm(incidentCombo, employeeCombo, vehicleCombo);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка создания назначения: {ex.Message}");
+            }
+        }
+        private void RefreshAllDataImmediately()
+        {
+            try
+            {
+                LoadIncidents();
+
+                RefreshAssignmentsTabImmediately();
+
+                RefreshAssignmentFormData();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка обновления данных: {ex.Message}");
+            }
+        }
+
+        private void RefreshAssignmentsTabImmediately()
+        {
+            try
+            {
+                foreach (TabItem tab in MainTabControl.Items)
+                {
+                    if (tab.Header.ToString() == "Назначения")
+                    {
+                        var stackPanel = tab.Content as StackPanel;
+                        if (stackPanel != null)
+                        {
+                            foreach (var child in stackPanel.Children)
+                            {
+                                if (child is DataGrid dataGrid)
+                                {
+                                    var assignments = LoadAssignments();
+                                    dataGrid.ItemsSource = null; 
+                                    dataGrid.ItemsSource = assignments.DefaultView;
+                                    Console.WriteLine($"DataGrid обновлен. Записей: {assignments.Rows.Count}");
+                                    return;
+                                }
+                            }
+                        }
+
+                        tab.Content = CreateAssignmentsTab();
+                        Console.WriteLine("Вкладка 'Назначения' пересоздана");
+                        return;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка обновления вкладки назначений: {ex.Message}");
+            }
+        }
+
+        private void RefreshAssignmentFormData()
+        {
+            try
+            {
+                foreach (TabItem tab in MainTabControl.Items)
+                {
+                    if (tab.Header.ToString() == "Назначить вызов")
+                    {
+                        var stackPanel = tab.Content as StackPanel;
+                        if (stackPanel != null && stackPanel.Children.Count >= 3)
+                        {
+                            var incidentCombo = stackPanel.Children[0] as ComboBox;
+                            var employeeCombo = stackPanel.Children[1] as ComboBox;
+                            var vehicleCombo = stackPanel.Children[2] as ComboBox;
+
+                            if (incidentCombo != null && employeeCombo != null && vehicleCombo != null)
+                            {
+                                LoadAssignmentData(incidentCombo, employeeCombo, vehicleCombo);
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка обновления формы назначения: {ex.Message}");
+            }
+        }
+
+        private void ClearAssignmentForm(ComboBox incidentCombo, ComboBox employeeCombo, ComboBox vehicleCombo)
+        {
+            incidentCombo.SelectedIndex = -1;
+            employeeCombo.SelectedIndex = -1;
+            vehicleCombo.SelectedIndex = -1;
+        }
+
+        private void UpdateIncidentStatus(int incidentId, string status)
+        {
+            try
+            {
+                string query = "UPDATE Происшествия SET Статус = @Status WHERE ID = @IncidentId";
+                string connectionString = "Server=localhost;Database=RSCHS;User Id=sa;Password=123;TrustServerCertificate=true;";
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    using (var command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@Status", status);
+                        command.Parameters.AddWithValue("@IncidentId", incidentId);
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка обновления статуса: {ex.Message}");
+            }
+        }
+
+        private void RefreshAllData()
+        {
+            LoadIncidents();
+
+            foreach (TabItem tab in MainTabControl.Items)
+            {
+                if (tab.Header.ToString() == "Назначения")
+                {
+                    var content = tab.Content as StackPanel;
+                    if (content != null)
+                    {
+                        foreach (var child in content.Children)
+                        {
+                            if (child is DataGrid dataGrid)
+                            {
+                                var assignments = LoadAssignments();
+                                dataGrid.ItemsSource = assignments.DefaultView;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private StackPanel CreateAssignmentForm()
+        {
+            var stackPanel = new StackPanel { Margin = new Thickness(20) };
+
+            stackPanel.Children.Add(new TextBlock { Text = "Выберите происшествие:", FontWeight = FontWeights.Bold });
+            var incidentComboBox = new ComboBox { Margin = new Thickness(0, 5, 0, 10), Height = 25 };
+
+            stackPanel.Children.Add(new TextBlock { Text = "Выберите сотрудника:", FontWeight = FontWeights.Bold });
+            var employeeComboBox = new ComboBox { Margin = new Thickness(0, 5, 0, 10), Height = 25 };
+
+            stackPanel.Children.Add(new TextBlock { Text = "Выберите транспорт:", FontWeight = FontWeights.Bold });
+            var vehicleComboBox = new ComboBox { Margin = new Thickness(0, 5, 0, 10), Height = 25 };
+
+            var assignButton = new Button
+            {
+                Content = "Назначить на вызов",
+                Background = System.Windows.Media.Brushes.Orange,
+                Foreground = System.Windows.Media.Brushes.White,
+                Margin = new Thickness(0, 10, 0, 0)
+            };
+
+            LoadAssignmentData(incidentComboBox, employeeComboBox, vehicleComboBox);
+
+            assignButton.Click += (s, e) =>
+            {
+                CreateAssignment(incidentComboBox, employeeComboBox, vehicleComboBox);
+            };
+
+            stackPanel.Children.Add(incidentComboBox);
+            stackPanel.Children.Add(employeeComboBox);
+            stackPanel.Children.Add(vehicleComboBox);
+            stackPanel.Children.Add(assignButton);
+
+            return stackPanel;
+        }
+
         private StackPanel CreateAssignmentsTab()
         {
             var stackPanel = new StackPanel { Margin = new Thickness(20) };
@@ -125,7 +380,6 @@ namespace RSCHS
                     Margin = new Thickness(0, 10, 0, 10),
                     Height = 300
                 };
-
 
                 var assignments = LoadAssignments();
                 dataGrid.ItemsSource = assignments.DefaultView;
@@ -163,20 +417,42 @@ namespace RSCHS
 
         private DataTable LoadAssignments()
         {
-            string query = @"
-                SELECT 
-                    н.ID,
-                    п.МестоПроисшествия,
-                    с.ФИО as Сотрудник,
-                    т.Марка + ' ' + т.Модель + ' (' + т.ГОСномер + ')' as Транспорт,
-                    н.Дата
-                FROM НазначенияНаВызовы н
-                JOIN Происшествия п ON н.ID_Происшествия = п.ID
-                JOIN Сотрудники с ON н.ID_Сотрудника = с.ID
-                JOIN Транспорт т ON н.ID_Транспорта = т.ID
-                ORDER BY н.Дата DESC";
+            try
+            {
+                string query = @"
+            SELECT 
+                н.ID,
+                п.МестоПроисшествия,
+                с.ФИО as Сотрудник,
+                т.Марка + ' ' + т.Модель + ' (' + т.ГОСномер + ')' as Транспорт,
+                н.Дата,
+                п.Статус as СтатусПроисшествия
+            FROM НазначенияНаВызовы н
+            JOIN Происшествия п ON н.ID_Происшествия = п.ID
+            JOIN Сотрудники с ON н.ID_Сотрудника = с.ID
+            JOIN Транспорт т ON н.ID_Транспорта = т.ID
+            ORDER BY н.Дата DESC";
 
-            return ExecuteQuery(query);
+                var result = ExecuteQuery(query);
+                Console.WriteLine($"Загружено назначений из БД: {result.Rows.Count}");
+
+                // Выводим для отладки
+                if (result.Rows.Count > 0)
+                {
+                    Console.WriteLine("=== ТЕКУЩИЕ НАЗНАЧЕНИЯ ===");
+                    foreach (DataRow row in result.Rows)
+                    {
+                        Console.WriteLine($"ID: {row["ID"]}, Место: {row["МестоПроисшествия"]}, Сотрудник: {row["Сотрудник"]}");
+                    }
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка загрузки назначений: {ex.Message}");
+                return new DataTable();
+            }
         }
 
         private StackPanel CreateReportsTab()

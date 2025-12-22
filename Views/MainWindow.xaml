@@ -1,9 +1,9 @@
-﻿<Window x:Class="RSCHS.MainWindow"
+﻿<Window x:Class="RSCHS.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:RSCHS"
+        xmlns:local="clr-namespace:RSCHS.Views"
         mc:Ignorable="d"
         Title="MainWindow" Height="600" Width="1000"
         WindowStartupLocation="CenterScreen">
@@ -29,27 +29,20 @@
             </Grid>
         </Border>
 
-        <!-- Меню -->
         <TabControl x:Name="MainTabControl">
             <TabItem Header="Происшествия">
-                <!-- Здесь будет список происшествий -->
             </TabItem>
 
             <TabItem Header="Новое происшествие">
-                <!-- Здесь будет форма создания происшествия -->
             </TabItem>
 
-            <!-- ДОБАВЬ ЭТУ ВКЛАДКУ -->
             <TabItem Header="Назначить вызов">
-                <!-- Содержимое будет создано в коде -->
             </TabItem>
 
             <TabItem Header="Назначения">
-                <!-- Здесь будет управление назначениями -->
             </TabItem>
 
             <TabItem Header="Отчеты">
-                <!-- Здесь будет работа с отчетами -->
             </TabItem>
         </TabControl>
     </DockPanel>

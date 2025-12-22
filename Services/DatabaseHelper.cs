@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 using System.Data.SqlClient;
 using System.Configuration;
 using System.Windows;
+using RSCHS.Models;
 
-namespace RSCHS
+namespace RSCHS.Services
 {
     public static class DatabaseHelper
     {

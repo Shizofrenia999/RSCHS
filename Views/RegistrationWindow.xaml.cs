@@ -3,7 +3,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace RSCHS
+namespace RSCHS.Views
 {
     public partial class RegistrationWindow : Window
     {
@@ -70,7 +70,7 @@ namespace RSCHS
                 using (SqlCommand insertCommand = new SqlCommand(insertQuery, connection))
                 {
                     insertCommand.Parameters.AddWithValue("@Login", login);
-                    insertCommand.Parameters.AddWithValue("@Password", password); 
+                    insertCommand.Parameters.AddWithValue("@Password", password);
                     insertCommand.Parameters.AddWithValue("@FullName", fullName);
                     insertCommand.Parameters.AddWithValue("@Position", position);
                     insertCommand.Parameters.AddWithValue("@Phone", string.IsNullOrWhiteSpace(phone) ? (object)DBNull.Value : phone);

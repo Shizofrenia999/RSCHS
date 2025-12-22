@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using RSCHS.Views;
+using System.Configuration;
 using System.Data;
 using System.Windows;
 
@@ -11,7 +12,6 @@ namespace RSCHS
     {
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            // Запускаем с окна авторизации
             LoginWindow loginWindow = new LoginWindow();
             loginWindow.Show();
         }

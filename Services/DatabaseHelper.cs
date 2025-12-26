@@ -9,7 +9,7 @@ namespace RSCHS.Services
 {
     public static class DatabaseHelper
     {
-        private static string connectionString = "Server=WIN-VH3ASTRV6E6\\SQLEXPRESS;Database=RSCHS;Trusted_Connection=True;"; // дом
+        private static string connectionString = "Server=WIN-VH3ASTRV6E6\\SQLEXPRESS;Database=RSCHS;Trusted_Connection=True;TrustServerCertificate=true;"; // дом
         //private static string connectionString = "Server=localhost;Database=RSCHS;User Id=sa;Password=123;TrustServerCertificate=true;";  // колледж
 
         public static Employee AuthenticateUser(string login, string password)

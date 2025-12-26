@@ -58,8 +58,8 @@ namespace RSCHS.Views
 
         private bool RegisterEmployee(string login, string password, string fullName, string position, string phone)
         {
-                    string connectionString = "Server=WIN-VH3ASTRV6E6\\SQLEXPRESS;Database=RSCHS;Trusted_Connection=True;"; // дом
-                    //string connectionString = "Server=localhost;Database=RSCHS;User Id=sa;Password=123;TrustServerCertificate=true;";
+            string connectionString = "Server=WIN-VH3ASTRV6E6\\SQLEXPRESS;Database=RSCHS;Trusted_Connection=True;TrustServerCertificate=true;";
+            //string connectionString = "Server=localhost;Database=RSCHS;User Id=sa;Password=123;TrustServerCertificate=true;";
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {

@@ -4,12 +4,17 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RSCHS.Views"
+        xmlns:vm="clr-namespace:RSCHS.ViewModels"
+        xmlns:helpers="clr-namespace:RSCHS.Helpers" xmlns:models="clr-namespace:RSCHS.Models" d:DataContext="{d:DesignInstance Type=models:Incident}"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="1000"
+        Title="МЧС Россия - Система диспетчера" 
+        Height="600" Width="1000"
         WindowStartupLocation="CenterScreen">
-
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </Window.Resources>
     <DockPanel>
-
+        <!-- Верхняя панель -->
         <Border DockPanel.Dock="Top" Background="#FF3333" Padding="10">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -22,27 +27,253 @@
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
                     <TextBlock Text="Диспетчер:" Foreground="White" Margin="0,0,5,0"/>
-                    <TextBlock x:Name="txtDispatcherName" Foreground="White" FontWeight="Bold"/>
-                    <Button x:Name="btnLogout" Content="Выйти" Margin="10,0,0,0" 
-                           Click="BtnLogout_Click" Background="#FFD700"/>
+                    <TextBlock Text="{Binding UserDisplayName}" 
+                              Foreground="White" FontWeight="Bold"/>
+                    <Button Content="Выйти" Margin="10,0,0,0" 
+                           Command="{Binding LogoutCommand}"
+                           Background="#FFD700" Padding="10,5"/>
                 </StackPanel>
             </Grid>
         </Border>
 
-        <TabControl x:Name="MainTabControl">
+        <!-- Вкладки -->
+        <TabControl>
+            <!-- Вкладка 1: Происшествия -->
             <TabItem Header="Происшествия">
+                <StackPanel Margin="10">
+                    <TextBlock Text="Список происшествий" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+
+                    <!-- Кнопки управления -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="Обновить" Command="{Binding LoadDataCommand}" 
+                               Width="100" Margin="0,0,10,0" Padding="5"/>
+                        <Button Content="Удалить выбранное" Command="{Binding DeleteIncidentCommand}" 
+                               Background="Red" Foreground="White" Width="120" Padding="5"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBlock Text="Поиск:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                        <TextBox Text="{Binding IncidentFilter, UpdateSourceTrigger=PropertyChanged}" 
+             Width="250" Height="25" Padding="5" 
+             ToolTip="Поиск по месту, типу, статусу, приоритету или описанию"/>
+                        <Button Content="×" Command="{Binding ClearIncidentFilterCommand}" 
+        Width="25" Height="25" Margin="5,0,0,0" 
+        ToolTip="Очистить фильтр"/>
+                    </StackPanel>
+
+                    <!-- Список происшествий -->
+                    <DataGrid ItemsSource="{Binding FilteredIncidents}" 
+         SelectedItem="{Binding SelectedIncident}"
+         AutoGenerateColumns="True"
+         Height="400" IsReadOnly="True">
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Priority}" Value="Высокий">
+                                        <Setter Property="Background" Value="#FFF5F5F5"/>
+                                        <Setter Property="Foreground" Value="#CC0000"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Priority}" Value="Средний">
+                                        <Setter Property="Background" Value="#FFFFF8E1"/>
+                                        <Setter Property="Foreground" Value="#FF8B4513"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Priority}" Value="Низкий">
+                                        <Setter Property="Background" Value="#FFE8F5FF"/>
+                                        <Setter Property="Foreground" Value="#FF0066CC"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+                    </DataGrid>
+                </StackPanel>
             </TabItem>
 
-            <TabItem Header="Новое происшествие">
+            <TabItem Header="Новое происшествие" 
+        Visibility="{Binding IsDispatcher, Converter={StaticResource BoolToVis}}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="20" Width="400">
+                        <TextBlock Text="Создание нового происшествия" 
+                      FontSize="16" FontWeight="Bold" Margin="0,0,0,20"/>
+
+                        <TextBlock Text="Место происшествия:" FontWeight="Bold"/>
+                        <TextBox Text="{Binding NewIncidentLocation, UpdateSourceTrigger=PropertyChanged}" 
+                    Margin="0,5,0,10" Height="25"/>
+
+                        <TextBlock Text="Тип происшествия:" FontWeight="Bold"/>
+                        <ComboBox ItemsSource="{Binding IncidentTypes}" 
+                                  SelectedItem="{Binding NewIncidentType, UpdateSourceTrigger=PropertyChanged}"
+                                  Margin="0,5,0,10" Height="25"/>
+
+                        <TextBlock Text="Приоритет:" FontWeight="Bold"/>
+                        <TextBlock Text="Приоритет:" FontWeight="Bold"/>
+                        <ComboBox ItemsSource="{Binding PriorityLevels}" 
+          SelectedItem="{Binding NewIncidentPriority, UpdateSourceTrigger=PropertyChanged}"
+          Margin="0,5,0,10" Height="25"/>
+
+                        <TextBlock Text="Описание:" FontWeight="Bold"/>
+                        <TextBox Text="{Binding NewIncidentDescription, UpdateSourceTrigger=PropertyChanged}" 
+                    Margin="0,5,0,10" Height="60" AcceptsReturn="True" TextWrapping="Wrap"/>
+
+                        <TextBlock Text="Телефон вызова:" FontWeight="Bold"/>
+                        <TextBox Text="{Binding NewIncidentPhone, UpdateSourceTrigger=PropertyChanged}" 
+                    Margin="0,5,0,20" Height="25"/>
+
+                        <Button Content="Создать происшествие" 
+                   Command="{Binding CreateIncidentCommand}"
+                   Background="#FF3333" Foreground="White" 
+                   FontWeight="Bold" Height="30" Padding="5"/>
+                    </StackPanel>
+                </ScrollViewer>
             </TabItem>
 
-            <TabItem Header="Назначить вызов">
+            <!-- Вкладка 3: Назначить вызов (только для диспетчеров) -->
+            <TabItem Header="Назначить вызов" 
+        Visibility="{Binding IsDispatcher, Converter={StaticResource BoolToVis}}">
+                <StackPanel Margin="20">
+                    <TextBlock Text="Назначение на вызов" 
+                  FontSize="16" FontWeight="Bold" Margin="0,0,0,20"/>
+
+                    <TextBlock Text="Выберите происшествие:" FontWeight="Bold"/>
+                    <ComboBox ItemsSource="{Binding Incidents}"
+                 SelectedItem="{Binding SelectedIncidentForAssignment}"
+                 DisplayMemberPath="DisplayInfo"
+                 Margin="0,5,0,10" Height="25"/>
+
+                    <TextBlock Text="Выберите сотрудника:" FontWeight="Bold"/>
+                    <ComboBox ItemsSource="{Binding Employees}"
+                 SelectedItem="{Binding SelectedEmployeeForAssignment}"
+                 DisplayMemberPath="FullName"
+                 Margin="0,5,0,10" Height="25"/>
+
+                    <TextBlock Text="Выберите транспорт:" FontWeight="Bold"/>
+                    <ComboBox ItemsSource="{Binding Transports}"
+                 SelectedItem="{Binding SelectedTransportForAssignment}"
+                 DisplayMemberPath="LicensePlate"
+                 Margin="0,5,0,20" Height="25"/>
+
+                    <Button Content="Назначить на вызов" 
+               Command="{Binding CreateAssignmentCommand}"
+               Background="Orange" Foreground="White" 
+               FontWeight="Bold" Height="30" Padding="5"/>
+                </StackPanel>
             </TabItem>
 
+            <!-- Вкладка 4: Назначения -->
             <TabItem Header="Назначения">
-            </TabItem>
+                
+                <StackPanel Margin="10">
+                    <TextBlock Text="Текущие назначения" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBlock Text="Поиск:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                        <TextBox Text="{Binding AssignmentFilter, UpdateSourceTrigger=PropertyChanged}" 
+             Width="250" Height="25" Padding="5"
+             ToolTip="Поиск по месту происшествия, сотруднику или транспорту"/>
+                        <Button Content="×" Command="{Binding ClearIncidentFilterCommand}" 
+        Width="25" Height="25" Margin="5,0,0,0" 
+        ToolTip="Очистить фильтр"/>
+                    </StackPanel>
+                    <Button Content="Удалить выбранное" Command="{Binding DeleteAssignmentCommand}" 
+                           Background="Red" Foreground="White" Width="150" Margin="0,0,0,10" Padding="5"/>
 
+                    <DataGrid ItemsSource="{Binding FilteredAssignments}"
+                             SelectedItem="{Binding SelectedAssignment}"
+                             AutoGenerateColumns="True"
+                             Height="400" IsReadOnly="True"/>
+                </StackPanel>
+            </TabItem>
+            <!-- Вкладка 5: Отчеты -->
             <TabItem Header="Отчеты">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                    <StackPanel Margin="10">
+                        <TextBlock Text="Система отчетности" 
+                      FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+
+                        <!-- Форма создания отчёта -->
+                        <GroupBox Header="Создать новый отчёт" Margin="0,0,0,20">
+                            <StackPanel Margin="10">
+                                <TextBlock Text="Выберите назначение:" FontWeight="Bold"/>
+                                <ComboBox x:Name="cmbAssignmentForReport"
+                             ItemsSource="{Binding AssignmentsForReport}"
+                             SelectedItem="{Binding SelectedAssignmentForReport}"
+                             DisplayMemberPath="DisplayInfo"
+                             Margin="0,5,0,10" Height="25"/>
+
+                                <TextBlock Text="Содержание отчёта:" FontWeight="Bold"/>
+                                <TextBox Text="{Binding NewReportContent, UpdateSourceTrigger=PropertyChanged}"
+                            Height="100" AcceptsReturn="True" TextWrapping="Wrap"
+                            Margin="0,5,0,10"/>
+
+                                <Button Content="Создать отчёт" 
+                           Command="{Binding CreateReportCommand}"
+                           Background="Green" Foreground="White" 
+                           Width="120" Height="30"/>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- Существующие отчёты -->
+                        <TextBlock Text="Созданные отчёты:" FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
+
+                        <!-- Кнопки управления И ПОЛЕ ПОИСКА -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <TextBlock Text="Поиск:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <TextBox Text="{Binding ReportFilter, UpdateSourceTrigger=PropertyChanged}" 
+                        Width="200" Height="25" Padding="5"/>
+                            <Button Content="×" Command="{Binding ClearReportFilterCommand}" 
+                       Width="25" Height="25" Margin="5,0,0,0" 
+                       ToolTip="Очистить фильтр"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <Button Content="Обновить список" Command="{Binding LoadReportsCommand}" 
+                       Width="120" Margin="0,0,10,0" Padding="5"/>
+                            <Button Content="Экспортировать выбранный" Command="{Binding ExportReportCommand}" 
+                       Width="160" Margin="0,0,10,0" Padding="5"/>
+                            <Button Content="Экспортировать все" Command="{Binding ExportAllReportsCommand}" 
+                       Background="Blue" Foreground="White" Width="140" Padding="5"/>
+                        </StackPanel>
+
+                        <!-- Список отчётов -->
+                        <DataGrid ItemsSource="{Binding FilteredReports}" 
+         SelectedItem="{Binding SelectedReport}"
+         AutoGenerateColumns="False"
+         Height="350" 
+         MaxHeight="400"
+         IsReadOnly="True"
+         HorizontalScrollBarVisibility="Auto"
+         VerticalScrollBarVisibility="Auto"
+         FontFamily="Segoe UI"
+         FontSize="12"
+         RowHeight="25">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ID" 
+                           Binding="{Binding ID}" 
+                           Width="40"
+                           MinWidth="40"/>
+
+                                <DataGridTextColumn Header="Дата" 
+                           Binding="{Binding CreationDate, StringFormat=dd.MM.yyyy HH:mm}" 
+                           Width="120"
+                           MinWidth="120"/>
+
+                                <DataGridTextColumn Header="Место" 
+                           Binding="{Binding IncidentLocation}" 
+                           Width="180"
+                           MinWidth="150"/>
+
+                                <DataGridTextColumn Header="Сотрудник" 
+                           Binding="{Binding EmployeeName}" 
+                           Width="150"
+                           MinWidth="120"/>
+
+                                <DataGridTextColumn Header="Содержание" 
+                           Binding="{Binding Content}" 
+                           Width="300"
+                           MinWidth="200"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </ScrollViewer>
             </TabItem>
         </TabControl>
     </DockPanel>

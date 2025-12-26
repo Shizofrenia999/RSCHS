@@ -63,6 +63,27 @@ namespace RSCHS.Models
             set { _date = value; OnPropertyChanged(); }
         }
 
+        // Конструкторы
+        public Incident()
+        {
+            Date = DateTime.Now;
+            Status = "Новый";
+        }
+
+        public Incident(string location, string type, string description, string priority, string callPhone)
+        {
+            Location = location;
+            Type = type;
+            Description = description;
+            Priority = priority;
+            CallPhone = callPhone;
+            Status = "Новый";
+            Date = DateTime.Now;
+        }
+
+        // Метод для удобного отображения в ComboBox
+        public string DisplayInfo => $"#{ID} - {Location} ({Type})";
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {

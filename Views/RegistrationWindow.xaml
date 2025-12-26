@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:RSCHS.Views"
         mc:Ignorable="d"
         Title="Регистрация нового сотрудника" 
-        Height="470" Width="400"
+        Height="500" Width="400"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize">
 
@@ -35,7 +35,7 @@
             </ComboBox>
 
             <TextBlock Text="Телефон:" FontWeight="Bold"/>
-            <TextBox x:Name="txtPhone" Margin="0,5,0,20" Height="25"/>
+            <TextBox x:Name="txtPhone" Margin="0,5,0,20" Height="25" PreviewTextInput="txtPhone_PreviewTextInput"/>
 
             <Button x:Name="btnRegister" Content="Зарегистрировать" 
                    Click="BtnRegister_Click" 

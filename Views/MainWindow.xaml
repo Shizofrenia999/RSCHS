@@ -14,6 +14,15 @@
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </Window.Resources>
     <DockPanel>
+        <!-- Меню -->
+        <Menu DockPanel.Dock="Top" Background="#F0F0F0">
+            <MenuItem Header="Файл">
+                <MenuItem Header="Выход" Command="{Binding LogoutCommand}"/>
+            </MenuItem>
+            <MenuItem Header="Справка">
+                <MenuItem Header="О программе" Click="MenuItem_About_Click"/>
+            </MenuItem>
+        </Menu>
         <!-- Верхняя панель -->
         <Border DockPanel.Dock="Top" Background="#FF3333" Padding="10">
             <Grid>
